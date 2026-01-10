@@ -1,6 +1,5 @@
 name: Build APK
 
-# Executa sempre que houver push no master
 on:
   push:
     branches:
@@ -8,7 +7,6 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -34,19 +32,33 @@ jobs:
       - name: Install Capacitor
         run: npm install @capacitor/cli @capacitor/android
 
-      # 6️⃣ Adicionar Android e sincronizar
+      # 6️⃣ Configurar Java (JDK 17)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 7️⃣ Instalar Android SDK e Build Tools
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 33
+          build-tools: "33.0.2"
+
+      # 8️⃣ Inicializar Capacitor Android
       - name: Initialize Capacitor Android
         run: |
           npx cap add android || echo "Android already added"
           npx cap sync android
 
-      # 7️⃣ Gerar APK debug
+      # 9️⃣ Build APK debug
       - name: Build APK
         run: |
           cd android
           ./gradlew assembleDebug
 
-      # 8️⃣ Subir APK como artefato para download
+      # 🔟 Subir APK como artefato
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
