@@ -10,45 +10,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Clonar o repositório
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # 2️⃣ Configurar Node.js
-      - uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '22'
 
-      # 3️⃣ Instalar dependências e build web
-      - run: npm install
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install
 
-      # 4️⃣ Instalar Capacitor
-      - run: npm install @capacitor/cli @capacitor/android
+      - name: Build Web
+        run: npm run build
 
-      # 5️⃣ Configurar Java
-      - uses: actions/setup-java@v3
+      - name: Install Capacitor
+        run: npm install @capacitor/cli @capacitor/android
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
 
-      # 6️⃣ Configurar Android SDK
-      - uses: android-actions/setup-android@v2
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v2
         with:
           api-level: 33
           build-tools: "33.0.2"
 
-      # 7️⃣ Adicionar/sincronizar Android
-      - run: |
+      - name: Initialize Capacitor Android
+        run: |
+          npx cap init --app-id com.admaquino.projeto --app-name ProjetoLovable || echo "Already initialized"
           npx cap add android || echo "Android already added"
-          npx cap sync android
+          npx cap sync
 
-      # 8️⃣ Build APK debug
-      - run: |
+      - name: Build APK
+        run: |
           cd android
           ./gradlew assembleDebug
 
-      # 9️⃣ Upload APK para GitHub Actions
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
